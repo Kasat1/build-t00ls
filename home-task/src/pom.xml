@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.test</groupId>
-    <artifactIdBuildArtifact</artifactId>
+    <groupId>vpayuta.maven.hw3</groupId>
+    <artifactId>hw3-app</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
     <properties>
+      <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
