@@ -4,7 +4,7 @@
     <groupId>com.test</groupId>
     <artifactId>BuildArtifact</artifactId>
     <version>1.0</version>
-   
+    <packaging>jar</packaging>
     <properties>
       <maven.compiler.source>1.7</maven.compiler.source>
       <maven.compiler.target>1.7</maven.compiler.target>
@@ -27,7 +27,7 @@
         <version>1.2.17</version>
       </dependency>
     </dependencies>
-    <build>
+<!--     <build>
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -42,5 +42,5 @@
           </configuration>
         </plugin>
       </plugins>
-    </build>   
+    </build>    -->
 </project>
