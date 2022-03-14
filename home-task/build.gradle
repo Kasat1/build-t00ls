@@ -1,1 +1,39 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
 
+version = '1.0'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+task build_custom(type: Jar) {
+	manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                'Implementation-Version': version,
+                'Main-Class': 'com.test.Project'
+    }
+    baseName = 'Custom-artifact-name'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task test_custom(type: Test, dependsOn: build_custom){
+        useJUnit()
+        testLogging {events "started", "passed","failed"}
+}
+
+task hello (dependsOn: test_custom) {
+        doLast{
+             println "this is hello task, it dependsOn test_custom task"
+        }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+      compile group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.4.1'
+      implementation 'org.apache.commons:commons-collections4:4.0'
+      testImplementation "junit:junit:4.12"
+}
