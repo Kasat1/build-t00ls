@@ -2,11 +2,12 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.test</groupId>
-    <artifactId>Artifact</artifactId>
+    <artifactId>BuildArtifact</artifactId>
     <version>1.0</version>
+   
     <properties>
-      <maven.compiler.source>1.8</maven.compiler.source>
-      <maven.compiler.target>1.8</maven.compiler.target>
+      <maven.compiler.source>1.7</maven.compiler.source>
+      <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
     <dependencies>
      <dependency>
@@ -32,7 +33,7 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.1.0</version>
-            <configuration>
+          <configuration>
             <archive>
               <manifest>
                 <mainClass>com.test.Project</mainClass>
