@@ -15,7 +15,7 @@
         <artifactId>commons<artifactId>
         <version>4.0</version>
       </dependency>
- TShi is trigger for sonar
+
       <dependency>
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
@@ -25,6 +25,12 @@
         <groupId>junits</groupId>
         <artifactId>junit</artifactId>
         <version>4.11</version>
+        <scope>test</scope>
+        <scope>test</scope>
+        <scope>test</scope>
+        <scope>test</scope>
+        <scope>test</scope>
+        <scope>test</scope>
         <scope>test</scope>
       </dependency>
     </dependencies> 
