@@ -114,7 +114,7 @@ under the License.
      | NOTE: You should either specify username/password OR privateKey/passphrase, since these pairings are
      |       used together.
      |
-<!--     <server>
+<!-- <server>
       <id>deploymentRepo</id>
       <username>repouser</username>
       <password>repopwd</password>
