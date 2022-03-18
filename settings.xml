@@ -122,13 +122,13 @@ under the License.
     -->
     <server>
       <id>nexus-repo</id>
-      <username>${nexus_user}</username>
-      <password>${nexus_pass}</password>
+      <username>admin</username>
+      <password>admin123</password>
     </server>
     <server>
       <id>deploy-repo</id>
-      <username>${nexus_user}</username>
-      <password>${nexus_pass}</password>
+      <username>admin</username>
+      <password>admin123</password>
     </server> -->
     <!-- Another sample, using keys to authenticate.
     <server>
