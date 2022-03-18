@@ -114,7 +114,7 @@ under the License.
      | NOTE: You should either specify username/password OR privateKey/passphrase, since these pairings are
      |       used together.
      |
-    <server>
+<!--     <server>
       <id>deploymentRepo</id>
       <username>repouser</username>
       <password>repopwd</password>
@@ -129,7 +129,7 @@ under the License.
       <id>deploy-repo</id>
       <username>${nexus_user}</username>
       <password>${nexus_pass}</password>
-    </server>
+    </server> -->
     <!-- Another sample, using keys to authenticate.
     <server>
       <id>siteServer</id>
@@ -173,7 +173,7 @@ under the License.
     <mirror>
       <id>nexus-repo</id>
       <name>Maven Repository Manager running localy</name>
-      <url>http://172.22.0.5:8081/repository/maven-public/</url>
+      <url>http://172.17.0.3:8081/repository/central/</url>
       <mirrorOf>*</mirrorOf>
     </mirror>
   </mirrors>
