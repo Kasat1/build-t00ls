@@ -12,7 +12,6 @@ job('MNTLAB-akasatau-main-build-job') {
             }
         }
     }
-  concurrentBuild()
   steps {
     triggerBuilder {
       configs {
