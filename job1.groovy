@@ -1,146 +1,99 @@
-job("day6/MNTLAB-aausiankin-main-build-job"){
-  parameters {
-    stringParam('BRANCH_NAME', 'jenkins-dsl', 'Branche name')
-    activeChoiceParam('CHILD_JOBS_NAMES') {
-      description('User can choose jobs for execution')
-        choiceType('CHECKBOX')
-        groovyScript {
-        script('["MNTLAB-aausiankin-child1-build-job", "MNTLAB-aausiankin-child2-build-job", "MNTLAB-aausiankin-child3-build-job", "MNTLAB-aausiankin-child4-build-job"]')
-        fallbackScript()
-      }
-    }
-  }  
-//   concurrentBuild()
-  steps {
-    triggerBuilder {
-      configs {
-        blockableBuildTriggerConfig {
-          projects('$CHILD_JOBS_NAMES')
-          block {
-            buildStepFailureThreshold('FAILURE')
-            unstableThreshold('UNSTABLE')
-            failureThreshold('FAILURE')
-          }
-          configs {
-            predefinedBuildParameters {
-              properties('BRANCH_NAME=$BRANCH_NAME')
-              textParamValueOnNewLine(false)
+def gitUrl = 'https://github.com/Kasat1/build-t00ls/tree/main'
+
+job('MNTLAB-akasatau-main-build-job') {
+    description 'This is main-build-job'
+    parameters {
+    	stringParam('BRANCH_NAME')
+        activeChoiceParam('JOB_TO_EXEC'){
+        	choiceType('CHECKBOX')
+            groovyScript{
+            	script('["MNTLAB-akasatau-child1-build-job","MNTLAB-akasatau-child2-build-job","MNTLAB-akasatau-child3-build-job","MNTLAB-akasatau-child4-build-job"]')
+            fallbackScript()
             }
-          } 
         }
-      }
-    } 
+    }
+}
+
+job("MNTLAB-akasatau-child1-build-job"){
+  parameters {
+    activeChoiceParam('BRANCH_NAME') {
+        choiceType('SINGLE_SELECT')
+    }
   }
-}
-
-job("day6/MNTLAB-aausiankin-child1-build-job"){
-  parameters {
-    activeChoiceParam('BRANCH_NAME') {
-      description('Branch name')
-        choiceType('SINGLE_SELECT')
-        groovyScript {
-        script('''def gitURL = "https://github.com/ovsyankinaa/jenkins-dsl.git"
-def command = "git ls-remote -h $gitURL"
-def proc = command.execute()
-proc.waitFor()
-if ( proc.exitValue() != 0 ) {
-  println "Error, ${proc.err.text}"
-  System.exit(-1)
-}
-def branches = proc.in.text.readLines().collect {
-  it.replaceAll(/[a-z0-9]*\\trefs\\/heads\\//, '')
-}
-return branches
-''')
-        fallbackScript()
-      }
-    }
-  }  
+    scm {
+    git { gitUrl
+        }
+    steps{
+    	maven('clean install')
+    }  
   steps {
-    shell('sleep 20')
+    shell('''
+cd home-task/target/
+tar cvf "$BRANCH_NAME_dsl_script.tar.gz" *.jar
+''')
   }  
 }
 
-job("day6/MNTLAB-aausiankin-child2-build-job"){
+job("MNTLAB-akasatau-child2-build-job"){
   parameters {
     activeChoiceParam('BRANCH_NAME') {
-      description('Branch name')
         choiceType('SINGLE_SELECT')
-        groovyScript {
-        script('''def gitURL = "https://github.com/ovsyankinaa/jenkins-dsl.git"
-def command = "git ls-remote -h $gitURL"
-def proc = command.execute()
-proc.waitFor()
-if ( proc.exitValue() != 0 ) {
-  println "Error, ${proc.err.text}"
-  System.exit(-1)
-}
-def branches = proc.in.text.readLines().collect {
-  it.replaceAll(/[a-z0-9]*\\trefs\\/heads\\//, '')
-}
-return branches
-''')
-        fallbackScript()
+    }
+  }
+    scm {
+    git { gitUrl
       }
     }
-  }  
+    steps{
+    	maven('clean install')
+    }  
   steps {
-    shell('sleep 20')
-  }  
-}
-  
-job("day6/MNTLAB-aausiankin-child3-build-job"){
-  parameters {
-    activeChoiceParam('BRANCH_NAME') {
-      description('Branch name')
-        choiceType('SINGLE_SELECT')
-        groovyScript {
-        script('''def gitURL = "https://github.com/ovsyankinaa/jenkins-dsl.git"
-def command = "git ls-remote -h $gitURL"
-def proc = command.execute()
-proc.waitFor()
-if ( proc.exitValue() != 0 ) {
-  println "Error, ${proc.err.text}"
-  System.exit(-1)
-}
-def branches = proc.in.text.readLines().collect {
-  it.replaceAll(/[a-z0-9]*\\trefs\\/heads\\//, '')
-}
-return branches
+    shell('''
+cd home-task/target/
+tar cvf "$BRANCH_NAME_dsl_script.tar.gz" *.jar
 ''')
-        fallbackScript()
-      }
-    }
-  }  
-  steps {
-    shell('sleep 20')
   }  
 }
 
-job("day6/MNTLAB-aausiankin-child4-build-job"){
+job("MNTLAB-akasatau-child3-build-job"){
   parameters {
     activeChoiceParam('BRANCH_NAME') {
-      description('Branch name')
         choiceType('SINGLE_SELECT')
-        groovyScript {
-        script('''def gitURL = "https://github.com/ovsyankinaa/jenkins-dsl.git"
-def command = "git ls-remote -h $gitURL"
-def proc = command.execute()
-proc.waitFor()
-if ( proc.exitValue() != 0 ) {
-  println "Error, ${proc.err.text}"
-  System.exit(-1)
-}
-def branches = proc.in.text.readLines().collect {
-  it.replaceAll(/[a-z0-9]*\\trefs\\/heads\\//, '')
-}
-return branches
-''')
-        fallbackScript()
+    }
+  }
+    scm {
+    git { gitUrl
       }
     }
-  }  
+    steps{
+    	maven('clean install')
+    }  
   steps {
-    shell('sleep 20')
+    shell('''
+cd home-task/target/
+tar cvf "$BRANCH_NAME_dsl_script.tar.gz" *.jar
+''')
   }  
+}
+
+job("MNTLAB-akasatau-child4-build-job"){
+  parameters {
+    activeChoiceParam('BRANCH_NAME') {
+        choiceType('SINGLE_SELECT')
+    }
+  }
+    scm {
+    git { gitUrl
+      }
+   }
+    steps{
+    	maven('clean install')
+    }  
+  steps {
+    shell('''
+cd home-task/target/
+tar cvf "$BRANCH_NAME_dsl_script.tar.gz" *.jar
+''')
+  }  
+}       
 }
