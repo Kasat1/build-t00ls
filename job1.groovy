@@ -12,12 +12,17 @@ job('MNTLAB-akasatau-main-build-job') {
             }
         }
     }
-      concurrentBuild()
-  		steps {
-    		triggerBuilder {
-      			configs {
-        			blockableBuildTriggerConfig {
-         				 projects('$JOB_TO_EXEC')
+  concurrentBuild()
+  steps {
+    triggerBuilder {
+      configs {
+        blockableBuildTriggerConfig {
+          projects('$JOB_TO_EXEC')
+          block {
+            buildStepFailureThreshold('FAILURE')
+            unstableThreshold('UNSTABLE')
+            failureThreshold('FAILURE')
+          }
           configs {
             predefinedBuildParameters {
               properties('BRANCH_NAME=$BRANCH_NAME')
