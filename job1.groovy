@@ -43,21 +43,20 @@ job("MNTLAB-TEST"){
         groovyScript {
         script('''
 def command = "git ls-remote -h $gitURL"
-def proc = command.execute()
-proc.waitFor()
-if ( proc.exitValue() != 0 ) {
-  println "Error, ${proc.err.text}"
-  System.exit(-1)
-}
-def branches = proc.in.text.readLines()
-return branches
+return command
 ''')
         fallbackScript()
       }
     }
   }  
+  steps{
+    	maven('clean install')
+    }  
   steps {
-    shell('sleep 20')
-  }  
+    shell('''
+cd home-task/target/
+tar cvf "$BRANCH_NAME_dsl_script.tar.gz" *.jar
+''')
+}
 }
 }
