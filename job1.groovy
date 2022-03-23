@@ -21,7 +21,8 @@ job("MNTLAB-akasatau-child1-build-job"){
     }
   }
     scm {
-    git { gitUrl
+    git { gitUrl 
+         branch '$BRANCH_NAME'
         }
     steps{
     	maven('clean install')
@@ -42,6 +43,7 @@ job("MNTLAB-akasatau-child2-build-job"){
   }
     scm {
     git { gitUrl
+        branch '$BRANCH_NAME'
       }
     }
     steps{
@@ -63,6 +65,7 @@ job("MNTLAB-akasatau-child3-build-job"){
   }
     scm {
     git { gitUrl
+         branch '$BRANCH_NAME'
       }
     }
     steps{
@@ -84,6 +87,7 @@ job("MNTLAB-akasatau-child4-build-job"){
   }
     scm {
     git { gitUrl
+                  branch '$BRANCH_NAME'
       }
    }
     steps{
