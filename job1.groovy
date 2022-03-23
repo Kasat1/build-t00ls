@@ -49,9 +49,7 @@ if ( proc.exitValue() != 0 ) {
   println "Error, ${proc.err.text}"
   System.exit(-1)
 }
-def branches = proc.in.text.readLines().collect {
-  it.replaceAll(/[a-z0-9]*\\trefs\\/heads\\//, '')
-}
+def branches = proc.in.text.readLines()
 return branches
 ''')
         fallbackScript()
