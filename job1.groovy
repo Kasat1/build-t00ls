@@ -35,69 +35,31 @@ tar cvf "$BRANCH_NAME_dsl_script.tar.gz" *.jar
   }  
 }
 
-job("MNTLAB-akasatau-child2-build-job"){
+job("MNTLAB-TEST"){
   parameters {
     activeChoiceParam('BRANCH_NAME') {
+      description('Branch name')
         choiceType('SINGLE_SELECT')
-    }
-  }
-    scm {
-    git { gitUrl
-        branch '$BRANCH_NAME'
+        groovyScript {
+        script('''
+def command = "git ls-remote -h $gitURL"
+def proc = command.execute()
+proc.waitFor()
+if ( proc.exitValue() != 0 ) {
+  println "Error, ${proc.err.text}"
+  System.exit(-1)
+}
+def branches = proc.in.text.readLines().collect {
+  it.replaceAll(/[a-z0-9]*\\trefs\\/heads\\//, '')
+}
+return branches
+''')
+        fallbackScript()
       }
     }
-    steps{
-    	maven('clean install')
-    }  
+  }  
   steps {
-    shell('''
-cd home-task/target/
-tar cvf "$BRANCH_NAME_dsl_script.tar.gz" *.jar
-''')
+    shell('sleep 20')
   }  
 }
-
-job("MNTLAB-akasatau-child3-build-job"){
-  parameters {
-    activeChoiceParam('BRANCH_NAME') {
-        choiceType('SINGLE_SELECT')
-    }
-  }
-    scm {
-    git { gitUrl
-         branch '$BRANCH_NAME'
-      }
-    }
-    steps{
-    	maven('clean install')
-    }  
-  steps {
-    shell('''
-cd home-task/target/
-tar cvf "$BRANCH_NAME_dsl_script.tar.gz" *.jar
-''')
-  }  
-}
-
-job("MNTLAB-akasatau-child4-build-job"){
-  parameters {
-    activeChoiceParam('BRANCH_NAME') {
-        choiceType('SINGLE_SELECT')
-    }
-  }
-    scm {
-    git { gitUrl
-                  branch '$BRANCH_NAME'
-      }
-   }
-    steps{
-    	maven('clean install')
-    }  
-  steps {
-    shell('''
-cd home-task/target/
-tar cvf "$BRANCH_NAME_dsl_script.tar.gz" *.jar
-''')
-  }  
-}       
 }
