@@ -50,12 +50,13 @@ pipeline {
 
         stage('stop previous containers') {
          steps {
-            withDockerServer([uri: 'tcp://10.0.2.15:4243']){
-            sh 'docker ps -a -fname=helloworld-ws -q | xargs -r docker container rm -f'
+             script {
+                withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                    sh 'docker ps -a -fname=helloworld-ws -q | xargs -r docker container rm -f'
             } 
          }
         }
-        
+        }
         stage('Docker Run') {
            steps{
              script {
