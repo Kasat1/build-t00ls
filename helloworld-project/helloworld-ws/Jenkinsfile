@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent built-in
     environment {
         imageName = 'helloworld-akasatau'
         registryCredentials = "Nexus_admin"
