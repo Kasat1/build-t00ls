@@ -3,7 +3,7 @@ pipeline {
     environment {
         imageName = 'helloworld-akasatau'
         registryCredentials = "Nexus_admin"
-        registry = "172.17.0.4:8082/repository/docker/"
+        registry = "localhost:8082"
         dockerImage = ''
     }
     tools { 
