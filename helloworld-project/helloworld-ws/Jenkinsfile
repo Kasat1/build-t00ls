@@ -29,8 +29,9 @@ pipeline {
           steps{
               dir('helloworld-project/helloworld-ws/') {
                 script {
+                    withDockerServer([uri: 'tcp://10.0.2.15:4243']){
                   dockerImage = docker.build imageName
-                  docker.withServer('tcp://10.0.2.15:4243')
+                    }
                 }
               }
           }
