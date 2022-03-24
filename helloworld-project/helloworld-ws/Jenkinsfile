@@ -69,11 +69,12 @@ pipeline {
          stage('Check ') {
            steps{
              script {   
-                 if ( $(curl -I 172.17.0.4:80 | head -n 1 | cut -d' ' -f2) -eq "200"){
-                     sh ' echo "all is good"'}
-                 else {
-                     sh 'echo "something went wrong" '}
-                }
+                  {sh '''
+                   if ( $(curl -I "172.17.0.4:80" | head -n 1 | cut -d' ' -f2) -eq "200" )
+                        echo "all is good"'}
+                   else {
+                        echo "something went wrong" '}
+                '''}
              }
         }
     }
