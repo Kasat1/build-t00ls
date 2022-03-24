@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+    environment {
+        imageName = 'helloworld-akasatau'
+        registryCredentials = "Nexus_admin"
+        registry = "172.17.0.3:8082"
+        dockerImage = ''
+    }
+    tools { 
+        maven 'mvn3' 
+    }
+    stages {
+        stage('Git')  {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Kasat1/build-t00ls.git'
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                dir('helloworld-project/helloworld-ws/') {
+                  sh 'mvn clean install'
+                }
+            }
+        }
+
+        stage('Building image') {
+          steps{
+              dir('helloworld-project/helloworld-ws/') {
+                script {
+                  dockerImage = docker.build imageName
+                }
+              }
+          }
+        }
+        
+        stage('Uploading to Nexus') {
+         steps{  
+             script {
+                 docker.withRegistry( 'http://'+registry, registryCredentials ) {
+                 dockerImage.push("rc-${env.BUILD_NUMBER}")
+                 dockerImage.push("latest")
+              }
+            }
+          }
+        }
+        
+    }
+}
