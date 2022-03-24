@@ -70,10 +70,12 @@ pipeline {
            steps{
              script {   
                   sh '''
-                   if ( $(curl -I "172.17.0.4:8080" | head -n 1 | cut -d' ' -f2) -eq "200" )
-                        echo "all is good"'}
+                   if [[ $(curl -I "172.17.0.4:8080" | head -n 1 | cut -d' ' -f2) -eq "200" ]]
+                   then
+                        echo "all is good"
                    else {
                         echo "something went wrong" '}
+                   fi
                 '''}
              
         }
