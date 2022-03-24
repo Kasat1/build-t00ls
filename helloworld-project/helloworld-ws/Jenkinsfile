@@ -70,7 +70,7 @@ pipeline {
            steps{
              script {   
                  withDockerServer([uri: 'tcp://10.0.2.15:4243']){
-                  sh 'curl -I localhost:80 '
+                  sh 'docker ps -f "status=running" '
                 }
              }
         }
