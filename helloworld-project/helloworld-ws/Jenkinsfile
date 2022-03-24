@@ -69,9 +69,10 @@ pipeline {
          stage('Check ') {
            steps{
              script {   
-                  sh 'curl -I 172.17.0.4:8080 '
+                 withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                  sh 'curl -I localhost:80 '
                 }
-             
+             }
         }
     }
     }
