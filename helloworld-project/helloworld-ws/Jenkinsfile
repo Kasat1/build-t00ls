@@ -30,6 +30,7 @@ pipeline {
               dir('helloworld-project/helloworld-ws/') {
                 script {
                   dockerImage = docker.build imageName
+                  docker.withServer('tcp://10.0.2.15:4243')
                 }
               }
           }
