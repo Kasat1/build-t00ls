@@ -70,7 +70,7 @@ pipeline {
            steps{
              script {   
                  withDockerServer([uri: 'tcp://10.0.2.15:4243']){
-                 if ( $(curl -I localhost:80 | head -n 1 | cut -d' ' -f2) -eq "200"){
+                 if ( $(curl -I 127.0.0.1:80 | head -n 1 | cut -d' ' -f2) -eq "200"){
                      sh ' echo "all is good"'}
                  else {
                      sh 'echo "something went wrong" '}
