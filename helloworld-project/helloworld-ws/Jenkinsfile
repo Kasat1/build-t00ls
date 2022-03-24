@@ -39,9 +39,10 @@ pipeline {
          stage('Uploading to Nexus') {
          steps{  
              script {
-                 docker.withRegistry( 'http://'+registry, registryCredentials ) {
-                 dockerImage.push("rc-${env.BUILD_NUMBER}")
-                 dockerImage.push("latest")
+                 withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                    docker.withRegistry( 'http://'+registry, registryCredentials ) {
+                    dockerImage.push("rc-${env.BUILD_NUMBER}")
+                    dockerImage.push("latest") }
               }
             }
           }
