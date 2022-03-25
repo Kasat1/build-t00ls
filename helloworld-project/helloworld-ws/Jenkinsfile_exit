@@ -40,17 +40,17 @@ pipeline {
             parallel {
                 stage('Test On Windows') {
                     steps {
-                        dir('helloworld-project/helloworld-ws/')
+                        dir('helloworld-project/helloworld-ws/'){
                         script {
-                            sh 'mvn test' 
+                            sh 'mvn test' }
                     }
                     }
                 }
                 stage('Test On Linux') {
                     steps {
-                        dir('helloworld-project/helloworld-ws/')
+                        dir('helloworld-project/helloworld-ws/'){
                         script {
-                            sh 'mvn test' 
+                            sh 'mvn test' }
                     }
                     }
                 }
