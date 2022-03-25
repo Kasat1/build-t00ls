@@ -36,7 +36,26 @@ pipeline {
               }
           }
         }
-         
+         stage('Run Tests') {
+            parallel {
+                stage('Test On Windows') {
+                    steps {
+                        dir('helloworld-project/helloworld-ws/')
+                        script {
+                            sh 'mvn test' 
+                    }
+                    }
+                }
+                stage('Test On Linux') {
+                    steps {
+                        dir('helloworld-project/helloworld-ws/')
+                        script {
+                            sh 'mvn test' 
+                    }
+                    }
+                }
+            }
+        }
       stage('Test') {
           parallel(
             stage('Test_1') {
