@@ -1,4 +1,4 @@
-def gitUrl = 'https://github.com/Kasat1/build-t00ls/tree/main'
+// def gitUrl = 'https://github.com/Kasat1/build-t00ls/tree/main'
     
 job('MNTLAB-akasatau-main-build-job') {
   description 'This is Main job'
@@ -20,7 +20,7 @@ job('MNTLAB-akasatau-main-build-job') {
   scm {
     git {
       remote {
-          url {gitUrl}
+          url 'https://github.com/Kasat1/build-t00ls'
       }
       branch '$BRANCH_NAME'
     }
@@ -63,7 +63,7 @@ mavenJob(job) {
   scm {
     git {
       remote {
-          url {gitUrl}
+          url 'https://github.com/Kasat1/build-t00ls'
       }
       branch '$BRANCH_NAME'
     }
