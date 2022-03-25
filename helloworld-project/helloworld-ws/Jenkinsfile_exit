@@ -1,0 +1,103 @@
+pipeline {
+    agent any
+    environment {
+        imageName = 'helloworld-akasatau'
+        registryCredentials = "Nexus_admin"
+        registry = "localhost:8082"
+        dockerImage = ''
+    }
+    tools { 
+        maven 'mvn3' 
+    }
+    stages {
+        stage('Git check')  {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Kasat1/build-t00ls.git'
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                dir('helloworld-project/helloworld-ws/') {
+                  sh 'mvn clean install'
+                }
+            }
+        }
+
+        stage('Building image') {
+          steps{
+              dir('helloworld-project/helloworld-ws/') {
+                script {
+                    withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                  dockerImage = docker.build imageName
+                    }
+                }
+              }
+          }
+        }
+         
+      stage('Test') {
+          parallel(
+            stage('Test_1') {
+              agent any 
+                steps{
+                  dir('helloworld-project/helloworld-ws/')
+                  script {
+                    sh 'mvn test' 
+                    }
+                }
+              }
+              stage('Test_2') {
+              agent any 
+                steps{
+                  dir('helloworld-project/helloworld-ws/')
+                  script {
+                    sh 'mvn test' 
+                    }
+                }
+              }
+        }
+        
+
+         stage('Uploading to Nexus') {
+         steps{  
+             script {
+                 withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                    docker.withRegistry( 'http://'+registry, registryCredentials ) {
+                    dockerImage.push("rc-${env.BUILD_NUMBER}")
+                    dockerImage.push("latest") }
+              }
+            }
+          }
+        }
+
+        stage('Stop old container') {
+         steps {
+             script {
+                withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                    sh 'docker ps -a -fname=helloworld-ws -q | xargs -r docker container rm -f'
+            } 
+         }
+        }
+        }
+        stage('Docker Run') {
+           steps{
+             script {
+                  withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                    sh 'docker run -d -p 80:8080 --name helloworld-ws ' + registry + '/helloworld-akasatau:latest'
+                  }
+                }
+             }
+        }
+         stage('Check ') {
+           steps{
+             script {   
+                 withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                  sh 'docker ps -f "status=running" '
+                }
+             }
+        }
+    }
+    }
+}   
