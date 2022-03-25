@@ -56,29 +56,6 @@ pipeline {
                 }
             }
         }
-      stage('Test') {
-          parallel(
-            stage('Test_1') {
-              agent any 
-                steps{
-                  dir('helloworld-project/helloworld-ws/')
-                  script {
-                    sh 'mvn test' 
-                    }
-                }
-              }
-              stage('Test_2') {
-              agent any 
-                steps{
-                  dir('helloworld-project/helloworld-ws/')
-                  script {
-                    sh 'mvn test' 
-                    }
-                }
-              }
-              )
-        }
-        
 
          stage('Uploading to Nexus') {
          steps{  
