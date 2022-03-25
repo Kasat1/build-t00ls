@@ -38,7 +38,7 @@ pipeline {
         }
          stage('Run Tests') {
             parallel {
-                stage('pre-integration-test’') {
+                stage('pre-integration-test') {
                     steps {
                         dir('helloworld-project/helloworld-ws/'){
                         script {
@@ -46,7 +46,7 @@ pipeline {
                     }
                     }
                 }
-                stage('pre-integration-test’') {
+                stage('integration-test') {
                     steps {
                         dir('helloworld-project/helloworld-ws/'){
                         script {
