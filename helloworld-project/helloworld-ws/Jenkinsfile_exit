@@ -38,7 +38,15 @@ pipeline {
         }
          stage('Run Tests') {
             parallel {
-                stage('Test On Windows') {
+                stage('pre-integration-test’') {
+                    steps {
+                        dir('helloworld-project/helloworld-ws/'){
+                        script {
+                            sh 'mvn pre-integration-test' }
+                    }
+                    }
+                }
+                stage('pre-integration-test’') {
                     steps {
                         dir('helloworld-project/helloworld-ws/'){
                         script {
@@ -46,7 +54,7 @@ pipeline {
                     }
                     }
                 }
-                stage('Test On Linux') {
+                 stage('post-integration-test') {
                     steps {
                         dir('helloworld-project/helloworld-ws/'){
                         script {
@@ -54,6 +62,7 @@ pipeline {
                     }
                     }
                 }
+                
             }
         }
 
