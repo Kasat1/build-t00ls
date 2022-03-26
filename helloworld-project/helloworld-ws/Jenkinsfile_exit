@@ -74,14 +74,12 @@ pipeline {
             parallel {
                 stage('Archiving artifact') {
                     steps {
-                dir('helloworld-project/helloworld-ws/') {
-                 sh 'tar -czf ${ARTIFACT} *_dsl_script.tar.gz target/helloworld-ws.war Jenkins-exit-task'
+                     sh 'tar -czf ${ARTIFACT} *_dsl_script.tar.gz helloworld-project/helloworld-ws/target/helloworld-ws.war helloworld-project/helloworld-ws/Jenkinsfile_exit'
                     archiveArtifacts artifacts: "${ARTIFACT}", followSymlinks: false
                     withCredentials([usernamePassword(credentialsId: 'Nexus_admin',
                              passwordVariable: 'PASS', 
                              usernameVariable: 'USERNAME')]) {
               sh 'curl --user $USERNAME:$PASS --upload-file ${ARTIFACT} http://172.17.0.3:8081/repository/For_tar_gz/${ARTIFACT}'
-                } 
                 }
                 }
                 }
