@@ -85,16 +85,9 @@ pipeline {
                             script {
                                     withDockerServer([uri: 'tcp://10.0.2.15:4243']){
                                         dockerImage = docker.build "helloworld-akasatau:${env.BUILD_NUMBER}"
-                                    }
-                            }
-                        }
-                  }
-                  steps{  
-                    script {
-                        withDockerServer([uri: 'tcp://10.0.2.15:4243']){
-                            docker.withRegistry( 'http://'+registry, registryCredentials ) {
-                            dockerImage.push("rc-${env.BUILD_NUMBER}")
-                            dockerImage.push("${env.BUILD_NUMBER}") }
+                                        docker.withRegistry( 'http://'+registry, registryCredentials ) {
+                                        dockerImage.push("rc-${env.BUILD_NUMBER}")
+                                        dockerImage.push("${env.BUILD_NUMBER}") }
               }
             }
           }
