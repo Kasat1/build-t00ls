@@ -66,7 +66,7 @@ pipeline {
         build job: 'MNTLAB-akasatau-child1-build-job', 
           parameters: [ string(name: 'BRANCH_NAME', value: 'akasatau')], wait : true
           copyArtifacts fingerprintArtifacts: true, 
-            projectName: 'MNTLAB-akasatau-child1-build-job', selector: lastSuccessful()
+            projectName: 'MNTLAB-akasatau-child1-build-job'
       }
     }
 
