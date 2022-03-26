@@ -25,13 +25,20 @@ pipeline {
                 }
             }
         }
-        stage('Sonar Scan') {
-            steps {
-                dir('helloworld-project/helloworld-ws/') {
-                  sh 'echo "Sonar Scan"'
-                }
-            }
+    stage('Sonar scan') {
+      steps {
+        dir('helloworld-project/helloworld-ws/') {
+          withSonarQubeEnv('Sonar') {
+            sh '''Sonar/bin/sonar-scanner \
+            -Dsonar.projectKey=jenkins \
+            -Dsonar.projectName=jenkins \
+            -Dsonar.projectVersion=1.0 \
+            -Dsonar.sources=src/main/java/org/jboss/as/quickstarts/wshelloworld \
+            -Dsonar.java.binaries=src/main/java/org/jboss/as/quickstarts/wshelloworld'''
+          }
         }
+      }
+    }
 
          stage('Run Tests') {
             parallel {
