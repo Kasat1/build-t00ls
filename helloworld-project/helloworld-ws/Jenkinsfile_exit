@@ -111,10 +111,6 @@ pipeline {
               env.MAN_APPROVE = input message: 'Are you ready kids?', ok: 'Continue', 
                 parameters: [choice(name: 'MAN_APPROVE', choices: 'Yes Captain\nNO Sir',description: 'Are you ready kids?')]
             }
-          catch (error) {
-            env.MAN_APPROVE = 'NO'
-            sh 'echo "Time is out!"'
-          }
         }
       }
     }
