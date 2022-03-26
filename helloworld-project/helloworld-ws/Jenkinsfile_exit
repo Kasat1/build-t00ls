@@ -46,7 +46,7 @@ pipeline {
                     steps {
                         dir('helloworld-project/helloworld-ws/'){
                         script {
-                            sh 'mvn test' }
+                            sh 'echo "integration-test"' }
                     }
                     }
                 }
@@ -54,7 +54,7 @@ pipeline {
                     steps {
                         dir('helloworld-project/helloworld-ws/'){
                         script {
-                            sh 'mvn test' }
+                            sh 'echo "post-integration-test"' }
                     }
                     }
                 }
