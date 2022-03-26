@@ -24,18 +24,14 @@ pipeline {
                 }
             }
         }
-
-        stage('Building image') {
-          steps{
-              dir('helloworld-project/helloworld-ws/') {
-                script {
-                    withDockerServer([uri: 'tcp://10.0.2.15:4243']){
-                  dockerImage = docker.build imageName
-                    }
+        stage('Sonar Scan') {
+            steps {
+                dir('helloworld-project/helloworld-ws/') {
+                  sh 'echo "Sonar Scan"'
                 }
-              }
-          }
+            }
         }
+
          stage('Run Tests') {
             parallel {
                 stage('pre-integration-test') {
@@ -65,8 +61,44 @@ pipeline {
                 
             }
         }
+        stage('Triggered Job') {
+            steps {
+                dir('helloworld-project/helloworld-ws/') {
+                  sh 'echo "Triggerred Job" > output.log'
+                }
+            }
+        }
 
-         stage('Uploading to Nexus') {
+            stage('Packaging and Publishing results') {
+            parallel {
+                stage('Archiving artifact') {
+                    steps {
+                        dir('helloworld-project/helloworld-ws/'){
+                        script {
+                            sh 'tar cvf pipeline-akasatau-{$BUILD_NUMBER}.tar.gz output.log Jenkinsfile_exit' }
+                    }
+                    }
+                }
+                stage('Building image') {
+                    steps {
+                        dir('helloworld-project/helloworld-ws/') {
+                            script {
+                                    withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                                        dockerImage = docker.build "imageName:{$BUILD_NUMBER}"
+                                    }
+                            }
+                        }
+                    }
+                }
+                
+                
+            }
+        }
+
+
+
+
+  stage('Uploading to Nexus') {
          steps{  
              script {
                  withDockerServer([uri: 'tcp://10.0.2.15:4243']){
@@ -77,6 +109,7 @@ pipeline {
             }
           }
         }
+
 
         stage('Stop old container') {
          steps {
@@ -91,7 +124,7 @@ pipeline {
            steps{
              script {
                   withDockerServer([uri: 'tcp://10.0.2.15:4243']){
-                    sh 'docker run -d -p 80:8080 --name helloworld-ws ' + registry + '/helloworld-akasatau:latest'
+                    sh 'docker run -d -p 80:8080 --name helloworld-ws ' + registry + '/helloworld-akasatau:${BUILD_NUMBER}'
                   }
                 }
              }
