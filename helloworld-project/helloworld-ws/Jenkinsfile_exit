@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        imageName = 'helloworld-akasatau:$BUILD_NUMBER'
+        imageName = 'helloworld-akasatau-$BUILD_NUMBER'
         registryCredentials = "Nexus_admin"
         registry = "localhost:8082"
         dockerImage = ''
