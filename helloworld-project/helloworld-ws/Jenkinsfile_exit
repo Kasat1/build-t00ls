@@ -6,6 +6,7 @@ pipeline {
         registry = "localhost:8082"
         dockerImage = ''
         ARTIFACT = "pipeline-akasatau-${env.BUILD_NUMBER}.tar.gz" 
+        scannerHome = tool 'Sonar'
     }
     tools { 
         maven 'mvn3' 
@@ -29,7 +30,7 @@ pipeline {
       steps {
         dir('helloworld-project/helloworld-ws/') {
           withSonarQubeEnv('Sonar') {
-            sh '''mvn sonar:sonar \
+            sh ''' ${scannerHome}/bin/sonar-scanner\
             -Dsonar.projectKey=jenkins \
             -Dsonar.projectName=jenkins \
             -Dsonar.projectVersion=1.0 \
