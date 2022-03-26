@@ -61,23 +61,29 @@ pipeline {
                 
             }
         }
-        stage('Triggered Job') {
-            steps {
-                dir('helloworld-project/helloworld-ws/') {
-                  sh 'echo "Triggerred Job" > output.log'
-                }
-            }
-        }
+        stage('Triggering job') {
+      steps{
+        build job: 'MNTLAB-akasatau-child1-build-job', 
+          parameters: [ string(name: 'BRANCH_NAME', value: 'akasatau')], wait : true
+          copyArtifacts fingerprintArtifacts: true, 
+            projectName: 'MNTLAB-akasatau-child1-build-job', selector: lastSuccessful()
+      }
+    }
 
             stage('Packaging and Publishing results') {
             parallel {
                 stage('Archiving artifact') {
                     steps {
-                        dir('helloworld-project/helloworld-ws/'){
-                        script {
-                            sh 'tar cvf pipeline-akasatau-{$BUILD_NUMBER}.tar.gz output.log Jenkinsfile_exit' }
-                    }
-                    }
+                dir('helloworld-project/helloworld-ws/') {
+                 sh 'tar -czf ${ARTIFACT} *_dsl_script.tar.gz target/helloworld-ws.war Jenkins-exit-task'
+                    archiveArtifacts artifacts: "${ARTIFACT}", followSymlinks: false
+                    withCredentials([usernamePassword(credentialsId: 'Nexus_admin',
+                             passwordVariable: 'PASS', 
+                             usernameVariable: 'USERNAME')]) {
+              sh 'curl --user $USERNAME:$PASS --upload-file ${ARTIFACT} http://172.17.0.3:8081/repository/For_tar_gz/${ARTIFACT}'
+                } 
+                }
+                }
                 }
                 stage('Building image') {
                     steps {
