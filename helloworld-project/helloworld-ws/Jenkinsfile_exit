@@ -5,6 +5,7 @@ pipeline {
         registryCredentials = "Nexus_admin"
         registry = "localhost:8082"
         dockerImage = ''
+        ARTIFACT = "pipeline-akasatau-${env.BUILD_NUMBER}.tar.gz" 
     }
     tools { 
         maven 'mvn3' 
