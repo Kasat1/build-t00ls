@@ -64,7 +64,7 @@ pipeline {
       stage('Triggering job') {
         steps{
         build job: 'MNTLAB-akasatau-child1-build-job', 
-          parameters: [ string(name: 'BRANCH_NAME', value: 'origin/master')], wait : true
+          parameters: [ string(name: 'BRANCH_NAME', value: 'origin/main')], wait : true
           copyArtifacts fingerprintArtifacts: true, 
             projectName: 'MNTLAB-akasatau-child1-build-job', selector: lastSuccessful()
       }
