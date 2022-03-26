@@ -135,7 +135,7 @@ pipeline {
            steps{
              script {
                   withDockerServer([uri: 'tcp://10.0.2.15:4243']){
-                    sh 'docker run -d -p 80:8080 --name helloworld-ws ' + registry + '/helloworld-akasatau:${env.BUILD_NUMBER}'
+                    sh 'docker run -d -p 80:8080 --name helloworld-ws ' + registry + "helloworld-akasatau:${env.BUILD_NUMBER}"
                   }
                 }
              }
