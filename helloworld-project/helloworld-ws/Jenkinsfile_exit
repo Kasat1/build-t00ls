@@ -29,7 +29,7 @@ pipeline {
       steps {
         dir('helloworld-project/helloworld-ws/') {
           withSonarQubeEnv('Sonar') {
-            sh '''Sonar/bin/sonar-scanner \
+            sh '''mvn sonar:sonar \
             -Dsonar.projectKey=jenkins \
             -Dsonar.projectName=jenkins \
             -Dsonar.projectVersion=1.0 \
