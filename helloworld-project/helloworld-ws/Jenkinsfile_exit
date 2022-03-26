@@ -84,7 +84,7 @@ pipeline {
                         dir('helloworld-project/helloworld-ws/') {
                             script {
                                     withDockerServer([uri: 'tcp://10.0.2.15:4243']){
-                                        dockerImage = docker.build imageName + ':$BUILD_NUMBER'
+                                        dockerImage = docker.build helloworld-akasatau:${env.BUILD_NUMBER}
                                     }
                             }
                         }
