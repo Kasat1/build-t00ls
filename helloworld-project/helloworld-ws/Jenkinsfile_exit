@@ -17,6 +17,11 @@ pipeline {
                 git branch: 'main',
                     url: 'https://github.com/Kasat1/build-t00ls.git'
             }
+            post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
         }
         
         stage('Package') {
@@ -25,6 +30,11 @@ pipeline {
                   sh 'mvn clean install'
                 }
             }
+            post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
         }
     stage('Sonar scan') {
       steps {
@@ -38,6 +48,11 @@ pipeline {
           }
         }
       }
+      post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
     }
 
          stage('Run Tests') {
@@ -49,6 +64,11 @@ pipeline {
                             sh 'mvn pre-integration-test' }
                     }
                     }
+                    post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
                 }
                 stage('integration-test') {
                     steps {
@@ -57,6 +77,11 @@ pipeline {
                             sh 'echo "integration-test"' }
                     }
                     }
+                    post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
                 }
                  stage('post-integration-test') {
                     steps {
@@ -64,6 +89,11 @@ pipeline {
                         script {
                             sh 'echo "post-integration-test"' }
                     }
+                    }
+                    post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
                     }
                 }
                 
@@ -76,6 +106,11 @@ pipeline {
           copyArtifacts fingerprintArtifacts: true, 
             projectName: 'MNTLAB-akasatau-child1-build-job', selector: lastSuccessful()
       }
+      post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
     }
 
             stage('Packaging and Publishing results') {
@@ -90,6 +125,11 @@ pipeline {
               sh 'curl --user $USERNAME:$PASS --upload-file ${ARTIFACT} http://172.17.0.3:8081/repository/For_tar_gz/${ARTIFACT}'
                 }
                 }
+                post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
                 }
                 stage('Building image') {
                     steps {
@@ -105,7 +145,11 @@ pipeline {
           }
                 }
                 
-                
+             post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }   
             }
         }
 }
@@ -120,6 +164,11 @@ pipeline {
             }
         }
       }
+      post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
     }
 
         stage('Stop old container') {
@@ -130,6 +179,11 @@ pipeline {
             } 
          }
         }
+        post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
         }
         stage('Docker Run') {
            steps{
@@ -139,6 +193,11 @@ pipeline {
                   }
                 }
              }
+             post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
         }
         
         
