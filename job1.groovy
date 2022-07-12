@@ -1,11 +1,11 @@
-job("day6/MNTLAB-aausiankin-main-build-job"){
+job("day6/MNTLAB-akasatau-main-build-job"){ 
   parameters {
     stringParam('BRANCH_NAME', 'jenkins-dsl', 'Branche name')
     activeChoiceParam('CHILD_JOBS_NAMES') {
       description('User can choose jobs for execution')
         choiceType('CHECKBOX')
         groovyScript {
-        script('["MNTLAB-aausiankin-child1-build-job", "MNTLAB-aausiankin-child2-build-job", "MNTLAB-aausiankin-child3-build-job", "MNTLAB-aausiankin-child4-build-job"]')
+        script('["MNTLAB-akasatau-child1-build-job", "MNTLAB-akasatau-child2-build-job", "MNTLAB-akasatau-child3-build-job", "MNTLAB-akasatau-child4-build-job"]')
         fallbackScript()
       }
     }
@@ -33,7 +33,7 @@ job("day6/MNTLAB-aausiankin-main-build-job"){
   }
 }
 
-job("day6/MNTLAB-aausiankin-child1-build-job"){
+job("day6/MNTLAB-akasatau-child1-build-job"){
   parameters {
     activeChoiceParam('BRANCH_NAME') {
       description('Branch name')
@@ -61,7 +61,7 @@ return branches
   }  
 }
 
-job("day6/MNTLAB-aausiankin-child2-build-job"){
+job("day6/MNTLAB-akasatau-child2-build-job"){
   parameters {
     activeChoiceParam('BRANCH_NAME') {
       description('Branch name')
@@ -89,7 +89,7 @@ return branches
   }  
 }
   
-job("day6/MNTLAB-aausiankin-child3-build-job"){
+job("day6/MNTLAB-akasatau-child3-build-job"){
   parameters {
     activeChoiceParam('BRANCH_NAME') {
       description('Branch name')
@@ -117,7 +117,7 @@ return branches
   }  
 }
 
-job("day6/MNTLAB-aausiankin-child4-build-job"){
+job("day6/MNTLAB-akasatau-child4-build-job"){
   parameters {
     activeChoiceParam('BRANCH_NAME') {
       description('Branch name')
