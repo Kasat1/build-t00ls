@@ -36,7 +36,7 @@ pipeline {
         script{
           try {      
             cleanWs()
-            git branch: 'akasatau-exit-task', url: 'https://github.com/ovsyankinaa/build-t00ls.git'
+            git branch: 'akasatau-exit-task', url: 'https://github.com/Kasat1/build-t00ls.git'
           }
           catch (error){
             LS_STAGE_NAME = env.STAGE_NAME 
