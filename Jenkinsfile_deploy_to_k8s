@@ -1,0 +1,393 @@
+def push_fn(String artifact){
+  switch(artifact) {
+    case 'maven':
+      withCredentials([usernamePassword(credentialsId: 'jenkins_docker',
+                      passwordVariable: 'NEXUS_PASS', 
+                      usernameVariable: 'NEXUS_USER')]) {
+        sh """curl --user $NEXUS_USER:$NEXUS_PASS --upload-file \
+$WORKSPACE/${ARTIFACT} http://172.22.0.5:8081/repository/exit_task/${ARTIFACT}"""
+      }
+      break;
+    case 'image':
+      docker.withRegistry( 'http://172.22.0.5:8085', 'jenkins_nexus' ) {
+        docker_img.push("${env.BUILD_NUMBER}")
+      }
+      break;
+  }
+}
+
+pipeline {
+  agent { label 'build-in' }
+  options { timestamps () }
+  environment{
+    ARTIFACT = "pipeline-akasatau-${env.BUILD_NUMBER}.tar.gz" 
+    NS = 'akasatau'
+    LS_STAGE_NAME = ''
+    ERROR_MESSAGE = ''
+  }
+  tools { 
+    maven 'maven_3.8.4' 
+  }
+  
+  stages {
+
+    stage('Preparation') {
+      steps {
+        script{
+          try {      
+            cleanWs()
+            git branch: 'akasatau-exit-task', url: 'https://github.com/ovsyankinaa/build-t00ls.git'
+          }
+          catch (error){
+            LS_STAGE_NAME = env.STAGE_NAME 
+            ERROR_MESSAGE = "${error}"
+            throw error
+          }
+        }
+      } 
+    }    
+
+    stage('Building code') {
+      steps {
+        script{
+          try {
+            dir('helloworld-project/helloworld-ws/') {
+              sh 'mvn clean package -DskipTests'
+            }
+          }
+          catch (error){
+            LS_STAGE_NAME = env.STAGE_NAME 
+            ERROR_MESSAGE = "${error}"
+            throw error
+          }
+        }
+      }
+    }
+
+    stage('Sonar scan') {
+      steps {
+        script{
+          try {
+            dir('helloworld-project/helloworld-ws/') {
+              withSonarQubeEnv('sonar_9.3') {
+                sh '''mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184:sonar \
+-Dsonar.projectKey=pipeline:maven \
+-Dsonar.projectName=pipeline_docker_maven \
+-Dsonar.projectVersion=1.0 \
+-Dsonar.sources=src/main/java/org/jboss/as/quickstarts/wshelloworld \
+-Dsonar.java.binaries=src/main/java/org/jboss/as/quickstarts/wshelloworld'''
+              }
+            }
+          }
+          catch (error){
+            LS_STAGE_NAME = env.STAGE_NAME
+            ERROR_MESSAGE = "${error}"
+            throw error
+          }
+        }
+      }
+    }
+
+    stage('testing') {
+      parallel {
+
+        stage('pre-integration-test') {
+          steps{
+            script{
+              try{
+                dir('helloworld-project/helloworld-ws/') {
+                  sh 'mvn pre-integration-test'
+                }
+              }
+              catch (error){
+                LS_STAGE_NAME = env.STAGE_NAME 
+                ERROR_MESSAGE = "${error}"
+                throw error
+              }
+            }
+          }
+        }
+
+        stage('integration-test') {
+          steps{
+            script{
+              try{
+                dir('helloworld-project/helloworld-ws/') {
+                  sh 'echo "mvn integration-test"'
+                }
+              }
+              catch (error){
+                LS_STAGE_NAME = env.STAGE_NAME 
+                ERROR_MESSAGE = "${error}"
+                throw error
+              }
+            }
+          }
+        }
+
+        stage('post-integration-test') {
+          steps{
+            script{
+              try{
+                dir('helloworld-project/helloworld-ws/') {
+                  sh 'echo "mvn post-integration-test"'
+                }
+              }
+              catch (error){
+                LS_STAGE_NAME = env.STAGE_NAME 
+                ERROR_MESSAGE = "${error}"
+                throw error
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Triggering job and fetching artefact after finishing') {
+      steps{
+        script{
+          try {
+            build job: 'day6/MNTLAB-akasatau-child1-build-job', 
+              parameters: [
+                string(name: 'BRANCH_NAME', value: 'branch1')
+              ],
+              wait : true
+              copyArtifacts fingerprintArtifacts: true, 
+                projectName: 'day6/MNTLAB-akasatau-child1-build-job', selector: lastSuccessful()
+          }
+          catch (error){
+            LS_STAGE_NAME = env.STAGE_NAME 
+            ERROR_MESSAGE = "${error}"
+            throw error
+          }
+        }
+      }
+    }
+
+    stage('Packaging anf Publishing results') {
+      parallel {
+
+        stage('Archiving artefact') {
+          steps{
+            script{
+              try{
+                sh """tar -czf ${ARTIFACT} *_dsl_script.tar.gz \
+helloworld-project/helloworld-ws/target/helloworld-ws.war Jenkins-exit-task"""
+                archiveArtifacts artifacts: "${ARTIFACT}", followSymlinks: false
+                push_fn('maven')
+              }
+              catch (error){
+                LS_STAGE_NAME = env.STAGE_NAME 
+                ERROR_MESSAGE = "${error}"
+                throw error
+              } 
+            }
+          }
+        }
+
+        stage('Creating Docker image') {
+          steps{
+            script{
+              try{
+                docker_img = docker.build "172.22.0.5:8085/repository/docker_repo/helloworld-akasatau:${env.BUILD_NUMBER}"
+/*                docker.withRegistry( 'http://172.22.0.5:8085', 'jenkins_nexus' ) {
+                  docker_img.push("${env.BUILD_NUMBER}")
+                }*/
+                push_fn('image')
+              }
+              catch (error){
+                LS_STAGE_NAME = env.STAGE_NAME 
+                ERROR_MESSAGE = "${error}"
+                throw error
+              } 
+            }
+          }
+        }
+      }
+    }
+
+    stage('Asking for manual approval'){
+      steps{
+        script{
+          try {
+            timeout(time:5, unit:'MINUTES') {
+              env.MAN_APPROVE = input message: 'Deploy', ok: 'Continue', 
+                parameters: [choice(name: 'MAN_APPROVE', choices: 'YES\nNO',description: 'Deploy?')]
+            }
+          }
+          catch (error) {
+            LS_STAGE_NAME = env.STAGE_NAME
+            env.MAN_APPROVE = 'NO'
+            sh 'echo "Timeout has been reached!"'
+            ERROR_MESSAGE = "${error}"
+            throw error
+          }
+        }
+      }
+    }
+    
+    stage('Deployment'){
+      when { environment name: 'MAN_APPROVE', value: 'YES' }
+      agent { label 'slave_1' }
+      steps{
+        script{
+          try{
+            withKubeConfig([credentialsId: '1e5b9e86-554d-498f-97d1-0806cac82bfb',
+                            caCertificate: '''-----BEGIN CERTIFICATE-----
+MIIDBjCCAe6gAwIBAgIBATANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwptaW5p
+a3ViZUNBMB4XDTIyMDIxNzIwMTEyMVoXDTMyMDIxNjIwMTEyMVowFTETMBEGA1UE
+AxMKbWluaWt1YmVDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOEh
+/MeenSAGwkH5NvdYSytLcjOWdYjL1FKQQL2xOJ3lpS1Q+gbeh+gqrJq+SEHe9xUE
+3b9E4KGsTxn8X3ZdvDdxPPe4O8FrCc090vWH7FpcRzStUMsmW+626Ep/PiA4tyzJ
+NrHpSYZT64gOFvF3IiH2TLkGdk5ikSuVod61yeAWpBRk/FH3jHDOCyfoBSN+4bKg
+HZK9Zd6UWvjOW7w9xvVHjFhZTzXAtJ1K5GP2XIf4DtQHqVUYlDZd7xxjlvX04+l6
+3MfuWjE9g1MV9b+0UqKozKIkqPsjac6pFoWMkrHpNqF7GYJJ9CiBbXTzn4asAosQ
+RakcmYWUsUOLcTiqrMkCAwEAAaNhMF8wDgYDVR0PAQH/BAQDAgKkMB0GA1UdJQQW
+MBQGCCsGAQUFBwMCBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQW
+BBTG8gVr91pe69yHVi7/W06PD9nrWjANBgkqhkiG9w0BAQsFAAOCAQEABduCWW2J
+LwSut5BFx9zmIeL7kLyvgcmMbIqj1p9FrNkiLziY3UnzCzCzkpc6t1Jde5XvVLdI
+EImpZPK/mCplCiMXDjXRDj96LUpw9Op+N3nPAXN/mOoZ5hkT0z0FyUri8fyOLGeQ
+8eJGTPxqmaCu8RITH0hkVHuMOGxDBRnvzjuzYr/ZjyTbg8EkagN3Owm36ZWfpt5Q
+3SqMlGN/T3qb1RwzX8noPN09cZZvzQVPtff8kzGhRwJQUJEL87Si0Qkq83ZhhTgK
+YG32dWSxWG77B9ZS6rkSfi82qMNSdb6wBoqgzUfZJh3ZqGJxkgOmDp01SQRKXevX
+01zZelFJ1Z6DFw==
+-----END CERTIFICATE-----''',
+                            serverUrl: 'https://192.168.49.2:8443'
+                            ]) {
+              sh "kubectl create ns ${NS} || echo 'Secret already exists!'"
+              withCredentials([usernamePassword(credentialsId: 'jenkins_docker',
+                               passwordVariable: 'NEXUS_PASS', 
+                               usernameVariable: 'NEXUS_USER')]) {
+                sh """kubectl create secret -n ${NS} docker-registry nexus \
+--docker-server=192.168.49.4:8085 \
+--docker-username=$NEXUS_USER \
+--docker-password=$NEXUS_PASS || echo 'Secret already exists!'"""
+            }
+              sh """cat <<EOF > nexus-deploy.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nexus-deploy
+  name: nexus-deploy
+  namespace: ${NS}
+spec:
+  replicas: 1 
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: nexus-pod
+  template:
+    metadata:
+      name: nexus-pod
+      labels:
+        app: nexus-pod
+    spec:
+      containers:
+      - image: 192.168.49.4:8085/repository/docker_repo/helloworld-akasatau:${env.BUILD_NUMBER}
+        name: nexus-pod
+        livenessProbe:
+          httpGet:
+            path: /helloworld-ws/
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /helloworld-ws/
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 3
+      imagePullSecrets:
+      - name: nexus
+EOF
+
+cat <<EOF > nexus-svc.yml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nexus-pod
+  name: nexus-svc
+  namespace: ${NS}
+spec:
+  externalIPs:
+  - 192.168.49.2
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: nexus-pod
+EOF
+
+cat <<EOF > nexus-ingress.yml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nexus-ingress
+  namespace: ${NS}
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: eap.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nexus-svc
+            port:
+              number: 8080
+        path: /helloworld-ws/
+        pathType: Exact
+EOF"""
+
+              sh 'kubectl apply -f nexus-deploy.yml'
+              sh 'kubectl apply -f nexus-svc.yml'
+              sh 'kubectl apply -f nexus-ingress.yml'
+              sh 'sleep 40'
+              sh '''cat <<EOF > deploy.sh
+#!/bin/bash
+[[ \\$(curl -LI http://eap.com/helloworld-ws/ -o /dev/null -w "%{http_code}\\\n" -s) != "200" ]] && (kubectl rollout undo deployment/nexus-deploy -n ${NS} || kubectl delete deploy nexus-deploy -n ${NS})
+exit 0
+EOF'''
+              sh 'cat deploy.sh'
+              sh '/bin/bash deploy.sh'
+            }
+          }
+          catch (error){
+            LS_STAGE_NAME = env.STAGE_NAME 
+            ERROR_MESSAGE = "${error}"
+            throw error
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      script{ env.EVENT_DATE = sh(returnStdout: true, script: 'date').trim()}
+      mail to: 'aliaksei_kasatau@epam.com',
+                subject: "Pipeline: ${currentBuild.fullDisplayName} completed successfully",
+                body: """Pipeline completed successfully ${env.BUILD_URL}
+Event date - ${EVENT_DATE}"""
+    }
+    failure {
+      script{ env.EVENT_DATE = sh(returnStdout: true, script: 'date').trim()}
+      mail to: 'aliaksei_kasatau@epam.com',
+                subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+                body: """Something is wrong with ${env.BUILD_URL}
+Failed stage - ${LS_STAGE_NAME}
+Error message - ${ERROR_MESSAGE}
+Error date - ${EVENT_DATE}"""
+    }
+  }
+}
