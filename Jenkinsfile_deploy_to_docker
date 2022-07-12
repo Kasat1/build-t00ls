@@ -1,0 +1,207 @@
+pipeline {
+    agent any
+    environment {
+        imageName = "helloworld-akasatau"
+        registryCredentials = "Nexus_admin"
+        registry = "localhost:8082"
+        dockerImage = ''
+        ARTIFACT = "pipeline-akasatau-${env.BUILD_NUMBER}.tar.gz" 
+        scannerHome = tool 'Sonar'
+    }
+    tools { 
+        maven 'mvn3' 
+    }
+    stages {
+        stage('Git check')  {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Kasat1/build-t00ls.git'
+            }
+            post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
+        }
+        
+        stage('Package') {
+            steps {
+                dir('helloworld-project/helloworld-ws/') {
+                  sh 'mvn clean install'
+                }
+            }
+            post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
+        }
+    stage('Sonar scan') {
+      steps {
+        dir('helloworld-project/helloworld-ws/') {
+          withSonarQubeEnv('Sonar') {
+            sh ''' ${scannerHome}/bin/sonar-scanner\
+            -Dsonar.projectKey=jenkins \
+            -Dsonar.projectName=jenkins \
+            -Dsonar.projectVersion=1.0 \
+            -Dsonar.sources=pom.xml '''
+          }
+        }
+      }
+      post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
+    }
+
+         stage('Run Tests') {
+            parallel {
+                stage('pre-integration-test') {
+                    steps {
+                        dir('helloworld-project/helloworld-ws/'){
+                        script {
+                            sh 'mvn pre-integration-test' }
+                    }
+                    }
+                    post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
+                }
+                stage('integration-test') {
+                    steps {
+                        dir('helloworld-project/helloworld-ws/'){
+                        script {
+                            sh 'echo "integration-test"' }
+                    }
+                    }
+                    post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
+                }
+                 stage('post-integration-test') {
+                    steps {
+                        dir('helloworld-project/helloworld-ws/'){
+                        script {
+                            sh 'echo "post-integration-test"' }
+                    }
+                    }
+                    post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
+                }
+                
+            }
+        }
+      stage('Triggering job') {
+        steps{
+        build job: 'MNTLAB-akasatau-child1-build-job', 
+          parameters: [ string(name: 'BRANCH_NAME', value: 'origin/main')], wait : true
+          copyArtifacts fingerprintArtifacts: true, 
+            projectName: 'MNTLAB-akasatau-child1-build-job', selector: lastSuccessful()
+      }
+      post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
+    }
+
+            stage('Packaging and Publishing results') {
+            parallel {
+                stage('Archiving artifact') {
+                    steps {
+                     sh 'tar -czf ${ARTIFACT} *_dsl_script.tar.gz helloworld-project/helloworld-ws/target/helloworld-ws.war helloworld-project/helloworld-ws/Jenkinsfile_exit'
+                    archiveArtifacts artifacts: "${ARTIFACT}", followSymlinks: false
+                    withCredentials([usernamePassword(credentialsId: 'Nexus_admin',
+                             passwordVariable: 'PASS', 
+                             usernameVariable: 'USERNAME')]) {
+              sh 'curl --user $USERNAME:$PASS --upload-file ${ARTIFACT} http://172.17.0.3:8081/repository/For_tar_gz/${ARTIFACT}'
+                }
+                }
+                post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
+                }
+                stage('Building image') {
+                    steps {
+                        dir('helloworld-project/helloworld-ws/') {
+                            script {
+                                    withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                                        dockerImage = docker.build "helloworld-akasatau:${env.BUILD_NUMBER}"
+                                        docker.withRegistry( 'http://'+registry, registryCredentials ) {
+                                        dockerImage.push("rc-${env.BUILD_NUMBER}")
+                                        dockerImage.push("${env.BUILD_NUMBER}") }
+              }
+            }
+          }
+                }
+                
+             post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }   
+            }
+        }
+}
+
+
+    stage('Approve'){
+      steps{
+        script{
+            timeout(time:5, unit:'MINUTES') {
+              env.MAN_APPROVE = input message: 'Are you ready kids?', ok: 'Continue', 
+                parameters: [choice(name: 'MAN_APPROVE', choices: 'Yes Captain\nNO Sir',description: 'Are you ready kids?')]
+            }
+        }
+      }
+      post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
+    }
+
+        stage('Stop old container') {
+         steps {
+             script {
+                withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                    sh 'docker ps -a -fname=helloworld-ws -q | xargs -r docker container rm -f'
+            } 
+         }
+        }
+        post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
+        }
+        stage('Docker Run') {
+           steps{
+             script {
+                  withDockerServer([uri: 'tcp://10.0.2.15:4243']){
+                    sh 'docker run -d -p 80:8080 --name helloworld-ws ' + registry + "/helloworld-akasatau:${env.BUILD_NUMBER}"
+                  }
+                }
+             }
+             post {
+                        unsuccessful {
+                            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: Check console output at ${env.BUILD_URL} to view the results.", attachLog: true ,recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!"
+                        }
+                    }
+        }
+        
+        
+        
+        
+}
+}
