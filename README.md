@@ -6,7 +6,7 @@
 ### 5) Main job should start the child ones, wait for its completion and take created artefact ###
 ### 6) Package (2 parallel job: 1st) Take an artifact from the previous step ( .war file ) and store it to Nexus repo; 2nd) Create Docker Image and push it to Nexus )
 ### 7)  Ask for manual approval ###
-### 8) Deploy to k8s with following param.: Namesapce: {custom}; Deplaoyment; Service; Ingress rule; Rolling update; Zero downtime / Or Deploy ro Docker###
+### 8) Deploy to k8s with following param.: Namesapce: {custom}; Deplaoyment; Service; Ingress rule; Rolling update; Zero downtime / Or Deploy ro Docker ###
 ### 9) Feedback stage (The message (feedback) should be sent by email with proper error description: failed stage, what has happened , when … etc. If pipeline status is ‘Success’ – send final email about this as well) ###
 ## EXAMPLE ##
 ![Screenshot](exp_res.png)
