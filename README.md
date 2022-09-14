@@ -8,5 +8,7 @@
 ### 7)  Ask for manual approval ###
 ### 8) Deploy to k8s with following param.: Namesapce: {custom}; Deployment; Service; Ingress rule; Rolling update; Zero downtime / Or Deploy ro Docker ###
 ### 9) Feedback stage (The message (feedback) should be sent by email with proper error description: failed stage, what has happened , when … etc. If pipeline status is ‘Success’ – send final email about this as well) ###
-## EXAMPLE ##
+## EXAMPLE 1##
+![Screenshot](exp_res_dp.png)
+## EXAMPLE 2##
 ![Screenshot](exp_res.png)
